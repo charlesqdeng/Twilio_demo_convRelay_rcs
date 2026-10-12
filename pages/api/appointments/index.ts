@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const created = await createAppointment({
       customerName: body.customerName,
       phoneNumber: body.phoneNumber,
-      serviceType: body.serviceType ?? 'Service Visit',
+      serviceType: body.serviceType ?? 'Course Session',
       appointmentTime: body.appointmentTime,
       status: body.status ?? 'Scheduled',
       vehicle: body.vehicle,

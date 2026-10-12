@@ -6,7 +6,7 @@ import styles from '../styles/Layout.module.css';
 
 const NAV = [
   { href: '/', label: 'Overview' },
-  { href: '/appointments', label: 'Appointments' },
+  { href: '/appointments', label: 'Enrollments' },
   { href: '/call', label: 'Call Agent' },
   { href: '/voice-agent-setup', label: 'Voice Agent Setup' },
 ];

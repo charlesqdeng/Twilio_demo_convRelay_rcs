@@ -17,13 +17,13 @@ import {
 const FIELD = {
   CustomerName: 'CustomerName',
   Phone: 'Phone',
-  Service: 'Service',
+  Service: 'Course',
   Date: 'Date',
   Time: 'Time',
   Status: 'Status',
   OfferedSlots: 'OfferedSlots',
   Location: 'Location',
-  Vehicle: 'Vehicle',
+  Vehicle: 'Cohort',
   Notes: 'Notes',
 } as const;
 

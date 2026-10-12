@@ -1,22 +1,22 @@
 # Betwext Conversation AI Demo
 
-An AI voice agent (Bay Area Honda Service) that helps callers manage their service appointments.
+An AI voice agent (Bay Area Learning Center) that helps students reschedule their enrolled course sessions.
 
 ## What it does
 
-- When a customer calls, the agent looks up their existing appointment by phone number and greets them by name.
-- The agent reads back the current date, time, and service and asks whether they'd like to keep it or reschedule.
+- When a student calls, the agent looks up their current enrollment by phone number and greets them by name.
+- The agent reads back the course they're enrolled in and the current session date/time, and asks whether they'd like to keep it or reschedule.
 - If the caller wants to reschedule, the agent sends an **RCS quick-reply text message** with 2–3 new available date/time options — the caller can tap a button to confirm, or state their preferred time on the call.
-- Appointment data is stored in Airtable, shared between the voice agent's tools and this app's dashboard.
+- Enrollment data is stored in Airtable, shared between the voice agent's tools and this app's dashboard.
 
 ## This app
 
 This Next.js app is an operations dashboard for the demo:
 
-- **Overview** — explains the appointment booking flow.
-- **Appointments** — view and manage appointment records (backed by Airtable, with a local fallback so the demo always works), add test appointments with a real phone number, and manually trigger a "new times" RCS quick-reply offer to test the confirm-by-tap experience.
+- **Overview** — explains the course rescheduling flow.
+- **Enrollments** — view and manage enrollment records (backed by Airtable, with a local fallback so the demo always works), add test enrollments with a real phone number, and manually trigger a "new times" RCS quick-reply offer to test the confirm-by-tap experience.
 - **Voice Agent Setup** — copyable Instructions/Prompt text for the voice agent, notes on which tools to enable (`getAirtableData`, `upsertAirtableData`, `sendRCS`), and a button to fetch/create the Content SID for the reschedule quick-reply message template.
-- **Call Agent** — dial the Bay Area Honda Service voice agent from the browser via the Twilio Voice SDK. The agent runs **inline in this Next.js app** — GPT-4o drives the conversation with function calling for Airtable lookups, appointment updates, and RCS quick-replies (see [utils/agent.ts](utils/agent.ts)). Pick which appointment to call as (impersonates that phone number so the agent looks them up by name), watch the live transcript stream in during the call, and review the post-call Twilio Conversational Intelligence transcript with PII redaction and side-by-side original / redacted audio playback.
+- **Call Agent** — dial the Bay Area Learning Center voice agent from the browser via the Twilio Voice SDK. The agent runs **inline in this Next.js app** — GPT-4o drives the conversation with function calling for Airtable lookups, enrollment updates, and RCS quick-replies (see [utils/agent.ts](utils/agent.ts)). Pick which enrollment to call as (impersonates that phone number so the agent looks them up by name), watch the live transcript stream in during the call, and review the post-call Twilio Conversational Intelligence transcript with PII redaction and side-by-side original / redacted audio playback.
 
 ## Setup
 
@@ -68,15 +68,17 @@ Messages send through `TWILIO_MESSAGING_SERVICE_SID` by default rather than a ba
 
 ## Airtable schema (`Appointments` table)
 
+The underlying Airtable columns are unchanged from the previous Honda scenario — only their *semantic meaning* has shifted. `Service` now holds a course name, `Vehicle` now holds a cohort/section label.
+
 | Field | Type | Purpose |
 |---|---|---|
-| `CustomerName` | Single line text | Greeting name |
+| `CustomerName` | Single line text | Student name (greeting) |
 | `Phone` | Phone number (E.164) | Primary lookup — used by the agent's `getAirtableData` and the inbound RCS handler |
-| `Service` | Single line text | e.g. Oil Change / 30,000 Mile Service |
-| `Vehicle` | Single line text | e.g. 2022 Honda Civic |
-| `Location` | Single line text | Service center name |
-| `Date` | Date | Appointment date (yyyy-mm-dd) |
-| `Time` | Single line text | Appointment time (e.g. "10:00 AM") |
+| `Service` | Single line text | Course name, e.g. "Intro to Python", "SAT Prep" |
+| `Vehicle` | Single line text | Cohort/section, e.g. "Spring 2026 Evening" (optional) |
+| `Location` | Single line text | Campus or room name |
+| `Date` | Date | Session date (yyyy-mm-dd) |
+| `Time` | Single line text | Session time (e.g. "10:00 AM") |
 | `Status` | Single select | `scheduled` / `confirmed` / `rescheduled` / `cancelled` (lowercase) |
 | `OfferedSlots` | Long text (JSON) | Set when a reschedule offer is sent; used to resolve a quick-reply tap |
 | `Notes` | Long text | Free-form (optional) |

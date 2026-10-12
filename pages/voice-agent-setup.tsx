@@ -55,11 +55,11 @@ const SCHEMA: Array<{ field: string; type: string; purpose: string }> = [
     type: 'Phone number (E.164)',
     purpose: 'Primary lookup for getAirtableData and the /api/rcs-inbound tap handler.',
   },
-  { field: 'Service', type: 'Single line text', purpose: 'e.g. Oil Change, 30,000 Mile Service.' },
-  { field: 'Vehicle', type: 'Single line text', purpose: 'e.g. 2022 Honda Civic.' },
-  { field: 'Location', type: 'Single line text', purpose: 'Service center name.' },
-  { field: 'Date', type: 'Date', purpose: 'Appointment date (yyyy-mm-dd).' },
-  { field: 'Time', type: 'Single line text', purpose: 'Appointment time (e.g. "10:00 AM").' },
+  { field: 'Service', type: 'Single line text', purpose: 'Course name, e.g. "Intro to Python", "SAT Prep". Stored in the Service column for backward compat.' },
+  { field: 'Vehicle', type: 'Single line text', purpose: 'Cohort/section, e.g. "Spring 2026 Evening". Stored in the Vehicle column for backward compat.' },
+  { field: 'Location', type: 'Single line text', purpose: 'Campus or room name.' },
+  { field: 'Date', type: 'Date', purpose: 'Session date (yyyy-mm-dd).' },
+  { field: 'Time', type: 'Single line text', purpose: 'Session time (e.g. "10:00 AM").' },
   {
     field: 'Status',
     type: 'Single select',
@@ -139,7 +139,7 @@ export default function VoiceAgentSetupPage({ instructionsText, promptText }: Pr
   return (
     <Layout
       title="Voice Agent Setup"
-      subtitle="Everything you need to configure the Bay Area Honda Service AI voice agent — the tools it uses, the Airtable schema, the exact prompt text, and the reschedule Content SID."
+      subtitle="Everything you need to configure the Bay Area Learning Center AI voice agent — the tools it uses, the Airtable schema, the exact prompt text, and the reschedule Content SID."
     >
       <div className={styles.grid}>
         <section className={styles.card}>

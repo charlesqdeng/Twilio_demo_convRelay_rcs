@@ -35,6 +35,20 @@ interface RecordingSummary {
   error?: string;
 }
 
+interface CallAnalysis {
+  sentiment: {
+    label: 'positive' | 'neutral' | 'negative' | 'mixed';
+    score: number;
+    rationale: string;
+  };
+  pii: {
+    found: boolean;
+    types: string[];
+    count: number;
+    summary: string;
+  };
+}
+
 function statusLabel(s: DeviceStatus): string {
   switch (s) {
     case 'initializing':
@@ -65,6 +79,10 @@ export default function CallPage() {
   const [pollingRecording, setPollingRecording] = useState(false);
   const [recording, setRecording] = useState<RecordingSummary | null>(null);
   const [recordingError, setRecordingError] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<CallAnalysis | null>(null);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const analysisRequestedForRef = useRef<string | null>(null);
 
   const deviceRef = useRef<any>(null);
   const connectionRef = useRef<any>(null);
@@ -174,6 +192,9 @@ export default function CallPage() {
     setTranscript([]);
     setRecording(null);
     setRecordingError(null);
+    setAnalysis(null);
+    setAnalysisError(null);
+    analysisRequestedForRef.current = null;
     try {
       const params: Record<string, string> = {};
       if (callAsPhone) params.phoneNumber = callAsPhone;
@@ -252,6 +273,42 @@ export default function CallPage() {
     }, 10000);
   }, []);
 
+  const runAnalysis = useCallback(
+    async (rec: RecordingSummary) => {
+      const key = rec.transcriptSid ?? callSid;
+      if (!key) return;
+      if (analysisRequestedForRef.current === key) return;
+      analysisRequestedForRef.current = key;
+      setAnalysisLoading(true);
+      setAnalysisError(null);
+      try {
+        const res = await fetch('/api/call-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullTranscript: rec.fullTranscript ?? '',
+            piiEntities: rec.piiEntities ?? [],
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? `analysis endpoint returned ${res.status}`);
+        setAnalysis(data as CallAnalysis);
+      } catch (err) {
+        analysisRequestedForRef.current = null;
+        setAnalysisError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setAnalysisLoading(false);
+      }
+    },
+    [callSid],
+  );
+
+  useEffect(() => {
+    if (recording?.status === 'completed' && recording.fullTranscript) {
+      runAnalysis(recording);
+    }
+  }, [recording, runAnalysis]);
+
   const checkRecordingNow = useCallback(async () => {
     if (!callSid) return;
     setRecordingError(null);
@@ -273,7 +330,7 @@ export default function CallPage() {
   return (
     <Layout
       title="Call Agent"
-      subtitle="Dial the Bay Area Honda Service voice agent from your browser. The agent runs inline in this app (GPT-4o driving the Airtable + sendRCS tools). Pick which appointment to call as, watch the live transcript stream in, then review the post-call Twilio Intelligence transcript with PII redaction."
+      subtitle="Dial the Bay Area Learning Center voice agent from your browser. The agent runs inline in this app (GPT-4o driving the Airtable + sendRCS tools). Pick which enrollment to call as, watch the live transcript stream in, then review the post-call Twilio Intelligence transcript with PII redaction."
     >
       <div className={styles.grid}>
         <section className={styles.card}>
@@ -283,7 +340,7 @@ export default function CallPage() {
                 Voice agent
               </div>
               <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a', marginTop: 4 }}>
-                Bay Area Honda Service
+                Bay Area Learning Center
               </div>
               <div className={styles.helper} style={{ marginTop: 2 }}>
                 Inline agent · GPT-4o · Airtable + RCS tools
@@ -479,7 +536,115 @@ export default function CallPage() {
             </div>
           )}
         </section>
+
+        {(recording?.status === 'completed' || analysis || analysisLoading || analysisError) && (
+          <section className={styles.card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+              <div>
+                <h2 className={styles.cardHeading}>Post-call analysis</h2>
+                <p className={styles.helper} style={{ maxWidth: 620 }}>
+                  Sentiment and PII summary derived from the completed Intelligence transcript (sentiment via GPT-4o-mini; PII categories from Twilio's redaction operators).
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  className={`${styles.button} ${styles.buttonSecondary}`}
+                  onClick={() => {
+                    if (recording?.status === 'completed') {
+                      analysisRequestedForRef.current = null;
+                      runAnalysis(recording);
+                    }
+                  }}
+                  disabled={analysisLoading || recording?.status !== 'completed'}
+                >
+                  {analysisLoading ? 'Analyzing…' : 'Re-run analysis'}
+                </button>
+              </div>
+            </div>
+
+            {analysisError && <div className={styles.error}>{analysisError}</div>}
+
+            {analysisLoading && !analysis && (
+              <div className={styles.helper} style={{ marginTop: 12 }}>
+                Running sentiment + PII analysis on the transcript…
+              </div>
+            )}
+
+            {analysis && (
+              <div style={{ marginTop: 14, display: 'grid', gap: 14 }}>
+                <div className={`${styles.grid} ${styles.gridCols2}`}>
+                  <div
+                    style={{
+                      padding: 14,
+                      borderRadius: 12,
+                      border: `1px solid ${sentimentBorder(analysis.sentiment.label)}`,
+                      background: sentimentBg(analysis.sentiment.label),
+                    }}
+                  >
+                    <div className={styles.helper}>Caller sentiment</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: '#0f172a', marginTop: 4, textTransform: 'capitalize' }}>
+                      {analysis.sentiment.label} · {analysis.sentiment.score.toFixed(2)}
+                    </div>
+                    <div style={{ fontSize: 13, color: '#334155', marginTop: 6 }}>
+                      {analysis.sentiment.rationale}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      padding: 14,
+                      borderRadius: 12,
+                      border: `1px solid ${analysis.pii.found ? '#fcd34d' : '#a7f3d0'}`,
+                      background: analysis.pii.found ? '#fffbeb' : '#ecfdf5',
+                    }}
+                  >
+                    <div className={styles.helper}>PII discussed</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: '#0f172a', marginTop: 4 }}>
+                      {analysis.pii.found ? `${analysis.pii.count} item(s)` : 'None detected'}
+                    </div>
+                    <div style={{ fontSize: 13, color: '#334155', marginTop: 6 }}>
+                      {analysis.pii.summary}
+                    </div>
+                    {analysis.pii.types.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                        {analysis.pii.types.map((t) => (
+                          <code key={t} className={styles.inlineCode}>{t}</code>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </Layout>
   );
+}
+
+function sentimentBorder(label: CallAnalysis['sentiment']['label']): string {
+  switch (label) {
+    case 'positive':
+      return '#a7f3d0';
+    case 'negative':
+      return '#fecaca';
+    case 'mixed':
+      return '#fcd34d';
+    default:
+      return '#e5e7eb';
+  }
+}
+
+function sentimentBg(label: CallAnalysis['sentiment']['label']): string {
+  switch (label) {
+    case 'positive':
+      return '#ecfdf5';
+    case 'negative':
+      return '#fef2f2';
+    case 'mixed':
+      return '#fffbeb';
+    default:
+      return '#f8fafc';
+  }
 }

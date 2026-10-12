@@ -4,20 +4,20 @@ import styles from '../styles/Layout.module.css';
 
 const FLOW = [
   {
-    title: 'Customer calls',
+    title: 'Student calls',
     body: 'A caller reaches the AI voice agent at your Twilio number.',
   },
   {
     title: 'Agent looks them up',
-    body: 'The agent calls its getAirtableData tool against the shared Appointments table and greets the caller by name with their current appointment.',
+    body: 'The agent calls its getAirtableData tool against the shared Enrollments table and greets the caller by name with the course session they are enrolled in.',
   },
   {
     title: '"Keep or reschedule?"',
-    body: 'The agent confirms the existing time. If the caller says keep, it closes the loop and updates status.',
+    body: 'The agent confirms the existing session time. If the caller says keep, it closes the loop and updates status.',
   },
   {
     title: 'RCS quick-reply offer',
-    body: 'If the caller wants to reschedule, the agent calls its sendRCS tool with 3 candidate slots — the caller confirms a new time with a single tap.',
+    body: 'If the caller wants to reschedule, the agent calls its sendRCS tool with 3 candidate session times — the caller confirms a new time with a single tap.',
   },
   {
     title: 'Airtable updates',
@@ -29,7 +29,7 @@ export default function OverviewPage() {
   return (
     <Layout
       title="Overview"
-      subtitle="An ops dashboard for the appointment voice agent. Voice happens on the agent; Airtable, RCS delivery, and the reschedule flow live here."
+      subtitle="An ops dashboard for the course-scheduling voice agent. Voice happens on the agent; Airtable, RCS delivery, and the reschedule flow live here."
     >
       <div className={styles.grid}>
         <section className={styles.card}>
@@ -37,10 +37,10 @@ export default function OverviewPage() {
           <div className={styles.cardBody}>
             <p>
               The <strong>Betwext Conversation AI Demo</strong> is an AI voice agent that helps
-              service customers manage their appointments. When a customer calls, the agent
-              greets them by name, confirms their appointment, and — if they want a different
-              time — sends an <strong>RCS quick-reply</strong> so they can confirm a new slot
-              with a single tap.
+              students at Bay Area Learning Center reschedule their enrolled course sessions.
+              When a student calls, the agent greets them by name, confirms the session they're
+              signed up for, and — if they need a different time — sends an{' '}
+              <strong>RCS quick-reply</strong> so they can confirm a new slot with a single tap.
             </p>
             <p>
               This Next.js app is the operations dashboard. It reads and writes the same
@@ -93,9 +93,9 @@ export default function OverviewPage() {
             <div className={styles.cardBody}>
               <p>
                 <Link href="/call">Call Agent</Link> uses the Twilio Voice SDK to dial the
-                Bay Area Honda Service agent — which runs <strong>inline</strong> in this
+                Bay Area Learning Center agent — which runs <strong>inline</strong> in this
                 Next.js app, driven by GPT-4o with function calling for Airtable lookups,
-                appointment updates, and RCS quick-replies. Pick which appointment to call
+                session updates, and RCS quick-replies. Pick which enrollment to call
                 as, watch the live transcript stream in, and after you hang up review the
                 post-call Twilio Conversational Intelligence transcript with PII redaction
                 and side-by-side original / redacted audio playback.

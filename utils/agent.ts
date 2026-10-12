@@ -158,11 +158,11 @@ async function runTool(
         found: true,
         appointment: {
           id: appt.id,
-          customer_name: appt.customerName,
-          service: appt.serviceType,
-          vehicle: appt.vehicle,
+          student_name: appt.customerName,
+          course: appt.serviceType,
+          cohort: appt.vehicle,
           location: appt.location,
-          appointment_time_iso: appt.appointmentTime,
+          session_time_iso: appt.appointmentTime,
           status: appt.status,
         },
       }),
@@ -331,17 +331,17 @@ export async function greeting(callSid: string, callerPhone: string): Promise<st
     const appt = await findByPhone(callerPhone);
     if (appt) {
       state.pinnedAppointment = appt;
-      seededContext = `The caller's phone number is ${callerPhone}. Their appointment on file is: id=${appt.id}, name=${appt.customerName}, service=${appt.serviceType}, vehicle=${appt.vehicle ?? 'unknown'}, appointment_time_iso=${appt.appointmentTime}, status=${appt.status}.`;
+      seededContext = `The caller's phone number is ${callerPhone}. Their enrollment on file is: id=${appt.id}, name=${appt.customerName}, course=${appt.serviceType}, cohort=${appt.vehicle ?? 'n/a'}, session_time_iso=${appt.appointmentTime}, status=${appt.status}.`;
     } else {
-      seededContext = `The caller's phone number is ${callerPhone}, but no appointment was found on file for that number.`;
+      seededContext = `The caller's phone number is ${callerPhone}, but no enrollment was found on file for that number.`;
     }
   } else {
-    seededContext = `The caller does not have a resolvable phone number (they're calling from a browser client). Politely ask them to say their phone number so you can look up their appointment.`;
+    seededContext = `The caller does not have a resolvable phone number (they're calling from a browser client). Politely ask them to say their phone number so you can look up their enrollment.`;
   }
 
   state.messages.push({
     role: 'system',
-    content: `Context for this call: ${seededContext}\n\nOpen with a warm greeting thanking them for calling Bay Area Honda Service. If we already have their appointment on file, greet them by first name and read back their appointment details, then ask whether they want to keep it or reschedule. If we do not, ask them to say their phone number.`,
+    content: `Context for this call: ${seededContext}\n\nOpen with a warm greeting thanking them for calling Bay Area Learning Center. If we already have their enrollment on file, greet them by first name and read back their course and session details, then ask whether they want to keep it or reschedule. If we do not, ask them to say their phone number.`,
   });
 
   const turn = await runAgentTurn(callSid, '');

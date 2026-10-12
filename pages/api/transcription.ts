@@ -29,8 +29,8 @@ function parseTranscript(raw: string | undefined): string {
 }
 
 function speakerFor(track: string | undefined): 'AGENT' | 'CALLER' {
-  // outbound_track = the leg initiated by the caller (browser); inbound_track = the answered leg (agent)
-  return track === 'inbound_track' ? 'AGENT' : 'CALLER';
+  // inbound_track = audio from the browser caller into Twilio; outbound_track = audio Twilio plays to them (the agent's voice)
+  return track === 'inbound_track' ? 'CALLER' : 'AGENT';
 }
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {

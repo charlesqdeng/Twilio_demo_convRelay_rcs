@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (err) {
     console.error('[voice] greeting failed:', err);
     opening =
-      "Hi, thanks for calling Bay Area Honda Service. I'm having trouble reaching our system right now — please try again in a moment.";
+      "Hi, thanks for calling Bay Area Learning Center. I'm having trouble reaching our system right now — please try again in a moment.";
   }
 
   twiml.say({ voice: AGENT_VOICE }, opening);

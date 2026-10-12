@@ -66,10 +66,10 @@ export default function AppointmentsPage() {
   const [form, setForm] = useState({
     customerName: '',
     phoneNumber: '',
-    serviceType: 'Oil Change',
+    serviceType: 'Intro to Python',
     appointmentTime: defaultTomorrow(),
     vehicle: '',
-    location: 'Bay Area Honda Service Center',
+    location: 'Bay Area Learning Center · Downtown Campus',
   });
 
   const load = useCallback(async () => {
@@ -118,12 +118,12 @@ export default function AppointmentsPage() {
       setForm({
         customerName: '',
         phoneNumber: '',
-        serviceType: 'Oil Change',
+        serviceType: 'Intro to Python',
         appointmentTime: defaultTomorrow(),
         vehicle: '',
-        location: 'Bay Area Honda Service Center',
+        location: 'Bay Area Learning Center · Downtown Campus',
       });
-      setFlash('Appointment added.');
+      setFlash('Enrollment added.');
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -131,7 +131,7 @@ export default function AppointmentsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this appointment?')) return;
+    if (!confirm('Delete this enrollment?')) return;
     setBusyId(id);
     setError(null);
     try {
@@ -204,8 +204,8 @@ export default function AppointmentsPage() {
 
   return (
     <Layout
-      title="Appointments"
-      subtitle="View and manage appointment records shared with the voice agent. Add a test appointment, or manually trigger an RCS quick-reply offer to test the confirm-by-tap experience."
+      title="Enrollments"
+      subtitle="View and manage enrollment records shared with the voice agent. Add a test enrollment, or manually trigger an RCS quick-reply offer to test the confirm-by-tap experience."
     >
       {banner}
       {error && <div className={`${styles.banner} ${styles.bannerErr}`}>{error}</div>}
@@ -213,16 +213,16 @@ export default function AppointmentsPage() {
 
       <div className={styles.grid}>
         <section className={styles.card}>
-          <h2 className={styles.cardHeading}>Appointments</h2>
+          <h2 className={styles.cardHeading}>Enrollments</h2>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>Student</th>
                   <th>Phone</th>
-                  <th>Service</th>
-                  <th>Vehicle</th>
-                  <th>Time</th>
+                  <th>Course</th>
+                  <th>Cohort</th>
+                  <th>Session time</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -235,7 +235,7 @@ export default function AppointmentsPage() {
                 )}
                 {!loading && appointments.length === 0 && (
                   <tr>
-                    <td colSpan={7}>No appointments yet — add one below.</td>
+                    <td colSpan={7}>No enrollments yet — add one below.</td>
                   </tr>
                 )}
                 {!loading &&
@@ -277,14 +277,14 @@ export default function AppointmentsPage() {
         </section>
 
         <section className={styles.card}>
-          <h2 className={styles.cardHeading}>Add test appointment</h2>
+          <h2 className={styles.cardHeading}>Add test enrollment</h2>
           <p className={styles.helper}>
             Use a real mobile number if you want to test the RCS quick-reply — ideally an
             Android device with Google Messages/RCS enabled.
           </p>
           <form className={styles.form} onSubmit={handleAdd}>
             <div className={styles.field}>
-              <label className={styles.label}>Customer name</label>
+              <label className={styles.label}>Student name</label>
               <input
                 className={styles.input}
                 required
@@ -304,26 +304,26 @@ export default function AppointmentsPage() {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Service type</label>
+              <label className={styles.label}>Course</label>
               <select
                 className={styles.select}
                 value={form.serviceType}
                 onChange={(e) => setForm({ ...form, serviceType: e.target.value })}
               >
-                <option>Oil Change</option>
-                <option>Tire Rotation</option>
-                <option>Brake Inspection</option>
-                <option>Multi-point Inspection</option>
-                <option>Battery Check</option>
+                <option>Intro to Python</option>
+                <option>Full-stack Web Development</option>
+                <option>Data Science Foundations</option>
+                <option>Business English</option>
+                <option>SAT Prep</option>
               </select>
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Vehicle</label>
+              <label className={styles.label}>Cohort</label>
               <input
                 className={styles.input}
                 value={form.vehicle}
                 onChange={(e) => setForm({ ...form, vehicle: e.target.value })}
-                placeholder="2022 Honda Civic"
+                placeholder="Spring 2026 Evening"
               />
             </div>
             <div className={styles.field}>
@@ -335,7 +335,7 @@ export default function AppointmentsPage() {
               />
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Appointment time</label>
+              <label className={styles.label}>Session time</label>
               <input
                 type="datetime-local"
                 className={styles.input}
@@ -346,7 +346,7 @@ export default function AppointmentsPage() {
             </div>
             <div className={styles.formActions}>
               <button type="submit" className={`${styles.button} ${styles.buttonPrimary}`}>
-                Add appointment
+                Add enrollment
               </button>
               <button
                 type="button"
