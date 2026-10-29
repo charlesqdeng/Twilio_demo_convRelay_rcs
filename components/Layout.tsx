@@ -3,12 +3,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
 import styles from '../styles/Layout.module.css';
+import { APP_NAME, CUSTOMER_INITIALS } from '../utils/brand';
 
 const NAV = [
   { href: '/', label: 'Overview' },
   { href: '/appointments', label: 'Enrollments' },
   { href: '/call', label: 'Call Agent' },
   { href: '/voice-agent-setup', label: 'Voice Agent Setup' },
+  { href: '/use-cases', label: 'Use Case Details' },
 ];
 
 interface LayoutProps {
@@ -22,13 +24,13 @@ export default function Layout({ title, subtitle, children }: LayoutProps) {
   return (
     <div className={styles.shell}>
       <Head>
-        <title>{`${title} — Betwext Conversation AI Demo`}</title>
+        <title>{`${title} — ${APP_NAME}`}</title>
       </Head>
       <header className={styles.header}>
         <div className={styles.brand}>
-          <span className={styles.brandMark}>BW</span>
+          <span className={styles.brandMark}>{CUSTOMER_INITIALS}</span>
           <div>
-            <div className={styles.brandTitle}>Betwext Conversation AI Demo</div>
+            <div className={styles.brandTitle}>{APP_NAME}</div>
             <div className={styles.brandTag}>Airtable · Twilio RCS · AI voice agent</div>
           </div>
         </div>

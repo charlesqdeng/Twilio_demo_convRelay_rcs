@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Twilio from 'twilio';
 import { greeting } from '../../utils/agent';
-import { getTwilioClient } from '../../utils/twilioClient';
 
 const VoiceResponse = Twilio.twiml.VoiceResponse;
 
@@ -33,17 +32,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  // Kick off a Twilio call recording so /api/recording-status can hand it
-  // to Conversational Intelligence when the call ends. Fire-and-forget.
-  if (callSid && publicUrl) {
-    getTwilioClient()
-      .calls(callSid)
-      .recordings.create({
-        recordingStatusCallback: `${publicUrl}/api/recording-status`,
-        recordingStatusCallbackEvent: ['completed'],
-        recordingChannels: 'dual',
-      })
-      .catch((err) => console.warn('[voice] recording.create failed:', err?.message ?? err));
+  // Record the call so /api/recording-status can hand it to Conversational
+  // Intelligence when the call ends. Started via TwiML rather than the REST
+  // API: during this webhook the call isn't in-progress yet, so
+  // recordings.create() fails with "not eligible for recording".
+  // Skipped on the no-speech reprompt redirect so we don't start a second one.
+  if (publicUrl && !req.query?.reprompt) {
+    twiml.start().recording({
+      recordingStatusCallback: `${publicUrl}/api/recording-status`,
+      recordingStatusCallbackEvent: ['completed'],
+      channels: 'dual',
+    });
   }
 
   // Ask the agent for its opening line
@@ -74,7 +73,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { voice: AGENT_VOICE },
     "I didn't catch that. Please give me a moment and try again.",
   );
-  twiml.redirect({ method: 'POST' }, publicUrl ? `${publicUrl}/api/voice` : '/api/voice');
+  twiml.redirect(
+    { method: 'POST' },
+    publicUrl ? `${publicUrl}/api/voice?reprompt=1` : '/api/voice?reprompt=1',
+  );
 
   res.setHeader('Content-Type', 'text/xml');
   res.status(200).send(twiml.toString());

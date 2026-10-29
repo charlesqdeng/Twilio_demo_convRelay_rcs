@@ -6,8 +6,20 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  * inline without triggering an auth prompt.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Only proxy Twilio and its pre-signed S3 media links, and only ever send
+  // Twilio credentials to Twilio — otherwise anyone who can reach this
+  // endpoint could point it at their own server and capture them.
   const target = String(req.query.url ?? '');
-  if (!target.startsWith('https://')) return res.status(400).send('Bad URL');
+  let host = '';
+  try {
+    const parsed = new URL(target);
+    if (parsed.protocol === 'https:') host = parsed.hostname;
+  } catch {
+    // fall through to the 400 below
+  }
+  const isTwilio = host === 'twilio.com' || host.endsWith('.twilio.com');
+  const isS3 = host.endsWith('.amazonaws.com');
+  if (!isTwilio && !isS3) return res.status(400).send('Bad URL');
 
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
   const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -25,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // pre-signed S3 URL that must be called WITHOUT the Basic Auth header.
     let response = await fetch(target, {
       redirect: 'manual',
-      headers: { Authorization: `Basic ${auth}` },
+      headers: isTwilio ? { Authorization: `Basic ${auth}` } : {},
     });
     while (response.status >= 300 && response.status < 400 && response.headers.get('location')) {
       const next = response.headers.get('location') as string;

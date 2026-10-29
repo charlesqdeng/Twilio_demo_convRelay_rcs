@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import styles from '../styles/Layout.module.css';
+import { APP_NAME } from '../utils/brand';
 
 const FLOW = [
   {
@@ -36,7 +37,7 @@ export default function OverviewPage() {
           <h2 className={styles.cardHeading}>What this demo shows</h2>
           <div className={styles.cardBody}>
             <p>
-              The <strong>Betwext Conversation AI Demo</strong> is an AI voice agent that helps
+              The <strong>{APP_NAME}</strong> is an AI voice agent that helps
               students at Bay Area Learning Center reschedule their enrolled course sessions.
               When a student calls, the agent greets them by name, confirms the session they're
               signed up for, and — if they need a different time — sends an{' '}
