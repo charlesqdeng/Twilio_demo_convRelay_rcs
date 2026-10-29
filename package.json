@@ -6,7 +6,7 @@
     "dev": "next dev -p 3030",
     "build": "next build",
     "start": "next start -p 3030",
-    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "launch": "bash start.sh",
     "launch:windows": "start.bat",
     "provision-twiml": "node scripts/provision-twiml-app.mjs",

@@ -1,7 +1,7 @@
 import Layout from '../components/Layout';
 import styles from '../styles/Layout.module.css';
 
-// Chip kinds mirror the legend in betwext-demo-use-cases.pdf.
+// Chip kinds mirror the legend rendered below: required, extra, feature/non-Twilio.
 type ChipKind = 'required' | 'extra' | 'feature';
 
 interface Chip {
